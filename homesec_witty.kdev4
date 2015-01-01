@@ -1,0 +1,4 @@
+[Project]
+Name=homesec_witty
+Manager=KDevCMakeManager
+VersionControl=kdevgit
