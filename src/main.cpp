@@ -11,21 +11,26 @@
 #include <Wt/WCssTheme>
 #include <Wt/WServer>
 #include <Wt/WResource>
+#include <Wt/WStreamResource>
+#include <Wt/WFileResource>
 #include <Wt/Http/Request>
 #include <Wt/Http/Response>
 #include <Wt/Dbo/Dbo>
 #include <Wt/Auth/AuthWidget>
 #include <Wt/Auth/PasswordService>
 #include <Wt/Auth/AuthModel>
-#include <string>
-#include <vector>
+#include <Wt/WAnchor>
+#include <Wt/WObject>
 #include <opencv2/objdetect/objdetect.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/opencv.hpp>
+#include <string>
+#include <vector>
 #include <time.h>
 #include <stdlib.h>
-
+#include <stdio.h>
+#include <stddef.h>
 
 #include "Session.h"
 
@@ -35,18 +40,28 @@
 // vlc -I dummy -v --noaudio --ttl 12 v4l2:///dev/video0:size=640x480  --sout '#std{access=mmsh,dst=:8081}' -V X11
 
 
+
 class TakePicWidget : public Wt::WContainerWidget {
 public:
+
+
 
     void takePic() {
 
         cv::Mat picture;
+
+        cap->grab();
         *cap >> picture;
 
-        std::string fileName = "/tmp/cap-" + std::to_string(time()) + ".jpg";
+        if (! fileName.empty()) {
+            unlink(fileName.c_str());
+        }
+
+        fileName = "/tmp/cap-" + std::to_string(time(nullptr)) + ".jpg";
 
         cv::imwrite(fileName, picture);
 
+        lastImage->setResource(new Wt::WFileResource(fileName, this));
         lastImage->show();
     }
 
@@ -71,13 +86,12 @@ public:
                 cap->grab();
             }
         }
-
-
     }
 
 private:
     Wt::WImage *lastImage;
     cv::VideoCapture *cap;
+    std::string fileName;
 
 };
 
@@ -110,7 +124,6 @@ HelloApplication::HelloApplication(const Wt::WEnvironment& env)
     setTheme(new Wt::WBootstrapTheme());
     useStyleSheet("css/style.css");
 
-
     authWidget
             = new Wt::Auth::AuthWidget(Session::getBaseAuth(), session.getUsers(),
                                session.getLogin());
@@ -122,7 +135,7 @@ HelloApplication::HelloApplication(const Wt::WEnvironment& env)
 
     authWidget->model()->addPasswordAuth(&Session::getPasswordAuth());
     authWidget->model()->addOAuth(Session::getOAuthServices());
-    authWidget->setRegistrationEnabled(true);
+    authWidget->setRegistrationEnabled(false);
     authWidget->processEnvironment();
     root()->addWidget(authWidget);
     root()->addWidget(takePicWidget);
