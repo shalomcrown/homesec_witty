@@ -91,7 +91,22 @@ Session::Session(const std::string& sqliteDb)
         std::cerr << "Using existing database";
     }
 
-    users = new UserDatabase(*this);
+    users = new HsUserDatabase(*this);
+}
+
+//===============================================================
+
+void Session::registerUser(const std::string& name, const std::string& password)
+{
+    dbo::Transaction transaction(*const_cast<Session*>(this));
+    Wt::Auth::User authUser = users->registerNew();
+    authUser.addIdentity(Wt::Auth::Identity::LoginName, name);
+    getPasswordAuth().updatePassword(authUser, password);
+
+    dbo::ptr<User> user = add(new User());
+
+    dbo::ptr<AuthInfo> authInfo = users->find(authUser);
+    authInfo.modify()->setUser(user);
 }
 
 //===============================================================
@@ -101,7 +116,7 @@ Session::~Session()
     delete users;
 }
 
-Wt::Auth::AbstractUserDatabase& Session::getUsers()
+HsUserDatabase& Session::getUsers()
 {
     return *users;
 }

@@ -1,3 +1,4 @@
+/build/
 .kdev4/
 CMakeCache.txt
 CMakeFiles/
@@ -8,3 +9,4 @@ cmake_install.cmake
 homesec.db
 resources
 src/homesec_witty
+/CMakeLists.txt

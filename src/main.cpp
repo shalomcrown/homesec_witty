@@ -17,6 +17,7 @@
 #include <Wt/Http/Response>
 #include <Wt/Dbo/Dbo>
 #include <Wt/Auth/AuthWidget>
+#include <Wt/Auth/AbstractUserDatabase>
 #include <Wt/Auth/PasswordService>
 #include <Wt/Auth/AuthModel>
 #include <Wt/WAnchor>
@@ -44,13 +45,15 @@
 class TakePicWidget : public Wt::WContainerWidget {
 public:
 
-
-
     void takePic() {
 
         cv::Mat picture;
 
-        cap->grab();
+        // Deal with 5 frame latency
+        for (int i = 0; i < 5; i++) {
+            cap->grab();
+        }
+
         *cap >> picture;
 
         if (! fileName.empty()) {
@@ -65,6 +68,8 @@ public:
         lastImage->show();
     }
 
+    //===============================================================
+
     TakePicWidget ( WContainerWidget* parent = 0 ) {
         lastImage = new Wt::WImage(this);
         lastImage->hide();
@@ -72,6 +77,8 @@ public:
         addWidget(new Wt::WBreak());
         button->clicked().connect(this, &TakePicWidget::takePic);
 
+
+//         Wt::WWidget::i
 
         cap = new cv::VideoCapture(0);
         if (! cap->isOpened()) {
@@ -85,6 +92,15 @@ public:
             for (int i = 0; i < 20; i++) {
                 cap->grab();
             }
+        }
+    }
+
+
+    //===============================================================
+
+    ~TakePicWidget() {
+        if (cap) {
+            cap->release();
         }
     }
 
@@ -119,10 +135,12 @@ HelloApplication::HelloApplication(const Wt::WEnvironment& env)
         : Wt::WApplication(env), session(appRoot() + "homesec.db")
 {
     setTitle("Hello world");
-     Wt::log("debug") << "App Root: " << appRoot();
+     Wt::log("info") << "App Root: " << appRoot();
     root()->addStyleClass("container");
     setTheme(new Wt::WBootstrapTheme());
     useStyleSheet("css/style.css");
+
+    session.registerUser("pi", "123456");
 
     authWidget
             = new Wt::Auth::AuthWidget(Session::getBaseAuth(), session.getUsers(),
@@ -165,7 +183,9 @@ void HelloApplication::authEvent() {
 
 Wt::WApplication *createApplication(const Wt::WEnvironment& env)
 {
-    return new HelloApplication(env);
+    Wt::WApplication * app = new HelloApplication(env);
+
+    return app;
 
 }
 
@@ -200,6 +220,8 @@ int main(int argc, char **argv)
     server.addEntryPoint(Wt::Application, createApplication);
     server.addResource(new TrialResfulResource(), "/api");
     Session::configureAuth();
+
+
 
     server.start();
     return server.waitForShutdown();
