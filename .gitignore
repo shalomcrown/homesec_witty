@@ -1,0 +1,10 @@
+.kdev4/
+CMakeCache.txt
+CMakeFiles/
+CPackConfig.cmake
+CPackSourceConfig.cmake
+Makefile
+cmake_install.cmake
+homesec.db
+resources
+src/homesec_witty
