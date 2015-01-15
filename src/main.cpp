@@ -40,6 +40,7 @@
 // Stream video vlc v4l2:///dev/video0:size640x480
 // vlc -I dummy -v --noaudio --ttl 12 v4l2:///dev/video0:size=640x480  --sout '#std{access=mmsh,dst=:8081}' -V X11
 
+cv::VideoCapture *cap = nullptr;
 
 
 class TakePicWidget : public Wt::WContainerWidget {
@@ -74,13 +75,16 @@ public:
         lastImage = new Wt::WImage(this);
         lastImage->hide();
         Wt::WPushButton *button = new Wt::WPushButton("Take pic", this);
-        addWidget(new Wt::WBreak());
+        addWidget(new Wt::WBreak(this));
         button->clicked().connect(this, &TakePicWidget::takePic);
 
 
 //         Wt::WWidget::i
 
-        cap = new cv::VideoCapture(0);
+        if (! cap) {
+            cap = new cv::VideoCapture(0);
+        }
+
         if (! cap->isOpened()) {
             Wt::log("warn") << "Cannot open video capture device";
             button->setText("Capture device not available");
@@ -92,6 +96,8 @@ public:
             for (int i = 0; i < 20; i++) {
                 cap->grab();
             }
+
+            takePic();
         }
     }
 
@@ -101,12 +107,12 @@ public:
     ~TakePicWidget() {
         if (cap) {
             cap->release();
+            cap = nullptr;
         }
     }
 
 private:
     Wt::WImage *lastImage;
-    cv::VideoCapture *cap;
     std::string fileName;
 
 };
@@ -170,12 +176,13 @@ void HelloApplication::authEvent() {
         << " (" << u.identity(Wt::Auth::Identity::LoginName) << ")"
         << " logged in.";
 
-        authWidget->hide();
         takePicWidget->show();
 
-    } else
+    } else {
         Wt::log("notice") << "User logged out.";
+        takePicWidget->hide();
     }
+}
 
 
 
@@ -186,7 +193,6 @@ Wt::WApplication *createApplication(const Wt::WEnvironment& env)
     Wt::WApplication * app = new HelloApplication(env);
 
     return app;
-
 }
 
 //===============================================================

@@ -113,6 +113,7 @@ void Session::registerUser(const std::string& name, const std::string& password)
 
 Session::~Session()
 {
+    Wt::log("info") << "Session being deleted";
     delete users;
 }
 
