@@ -32,10 +32,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stddef.h>
+#include <string.h>
+#include <math.h>
+#include <libavutil/mathematics.h>
+#include <libavformat/avformat.h>
+#include <libswscale/swscale.h>
 
 #include "Session.h"
 
-// Debian packages needed: libwt-dev libwt-doc libopencv-dev
+
+
+// Debian packages needed: libwt-dev libwt-doc libopencv-dev libwtdbo-dev libwtext-dev libwthttp-dev libwtdbosqlite-dev
 // Run with: --http-port 8080 --http-address localhost --docroot 'docroot' --approot '.'
 // Stream video vlc v4l2:///dev/video0:size640x480
 // vlc -I dummy -v --noaudio --ttl 12 v4l2:///dev/video0:size=640x480  --sout '#std{access=mmsh,dst=:8081}' -V X11
@@ -72,14 +79,14 @@ public:
     //===============================================================
 
     TakePicWidget ( WContainerWidget* parent = 0 ) {
+        Wt::log("info") << "Pic widget constructor";
+        
         lastImage = new Wt::WImage(this);
         lastImage->hide();
         Wt::WPushButton *button = new Wt::WPushButton("Take pic", this);
         addWidget(new Wt::WBreak(this));
         button->clicked().connect(this, &TakePicWidget::takePic);
 
-
-//         Wt::WWidget::i
 
         if (! cap) {
             cap = new cv::VideoCapture(0);
@@ -167,6 +174,7 @@ HelloApplication::HelloApplication(const Wt::WEnvironment& env)
 
 }
 
+//===============================================================
 
 void HelloApplication::authEvent() {
     if (session.getLogin().loggedIn()) {
