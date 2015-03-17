@@ -6,9 +6,9 @@
 #include <Wt/WPushButton>
 #include <Wt/WText>
 #include <Wt/WImage>
-#include <Wt/WBootstrapTheme>
-#include <Wt/WTheme>
-#include <Wt/WCssTheme>
+//#include <Wt/WBootstrapTheme>
+//#include <Wt/WTheme>
+//#include <Wt/WCssTheme>
 #include <Wt/WServer>
 #include <Wt/WResource>
 #include <Wt/WStreamResource>
@@ -80,7 +80,7 @@ public:
 
     TakePicWidget ( WContainerWidget* parent = 0 ) {
         Wt::log("info") << "Pic widget constructor";
-        
+
         lastImage = new Wt::WImage(this);
         lastImage->hide();
         Wt::WPushButton *button = new Wt::WPushButton("Take pic", this);
@@ -150,7 +150,7 @@ HelloApplication::HelloApplication(const Wt::WEnvironment& env)
     setTitle("Hello world");
      Wt::log("info") << "App Root: " << appRoot();
     root()->addStyleClass("container");
-    setTheme(new Wt::WBootstrapTheme());
+    //setTheme(new Wt::WBootstrapTheme());
     useStyleSheet("css/style.css");
 
     session.registerUser("pi", "123456");

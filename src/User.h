@@ -16,7 +16,7 @@ public:
     }
 };
 
-DBO_EXTERN_TEMPLATES(User);
+DBO_EXTERN_TEMPLATES(User)
 
 
 #endif
