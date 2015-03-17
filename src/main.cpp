@@ -54,14 +54,16 @@ class TakePicWidget : public Wt::WContainerWidget {
 public:
 
     void takePic() {
-
+       Wt::log("info") << "Take picture";
         cv::Mat picture;
 
         // Deal with 5 frame latency
+        Wt::log("info") << "grab 5 frames";
         for (int i = 0; i < 5; i++) {
             cap->grab();
         }
 
+        Wt::log("info") << "Retrieve last frame";
         *cap >> picture;
 
         if (! fileName.empty()) {
@@ -70,8 +72,10 @@ public:
 
         fileName = "/tmp/cap-" + std::to_string(time(nullptr)) + ".jpg";
 
+        Wt::log("info") << "Write frame to " << fileName;
         cv::imwrite(fileName, picture);
 
+        Wt::log("info") << "Set file as source for widget";
         lastImage->setResource(new Wt::WFileResource(fileName, this));
         lastImage->show();
     }
@@ -89,17 +93,21 @@ public:
 
 
         if (! cap) {
-            cap = new cv::VideoCapture(0);
+           Wt::log("info") << "New capture object";
+           cap = new cv::VideoCapture(0);
         }
 
         if (! cap->isOpened()) {
+           Wt::log("warning") << "Failed to open capture object";
             Wt::log("warn") << "Cannot open video capture device";
             button->setText("Capture device not available");
             button->disable();
         } else {
+           Wt::log("info") << "Set output size";
             cap->set(CV_CAP_PROP_FRAME_HEIGHT, 480);
             cap->set(CV_CAP_PROP_FRAME_WIDTH, 640);
 
+            Wt::log("info") << "20 warmup frames";
             for (int i = 0; i < 20; i++) {
                 cap->grab();
             }
@@ -148,7 +156,7 @@ HelloApplication::HelloApplication(const Wt::WEnvironment& env)
         : Wt::WApplication(env), session(appRoot() + "homesec.db")
 {
     setTitle("Hello world");
-     Wt::log("info") << "App Root: " << appRoot();
+    Wt::log("info") << "App Root: " << appRoot();
     root()->addStyleClass("container");
     //setTheme(new Wt::WBootstrapTheme());
     useStyleSheet("css/style.css");
