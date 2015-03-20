@@ -161,6 +161,8 @@ HelloApplication::HelloApplication(const Wt::WEnvironment& env)
     //setTheme(new Wt::WBootstrapTheme());
     useStyleSheet("css/style.css");
 
+
+    // If no user 'pi' registered, register a new one
     Wt::Auth::User user =  session.getUsers().findWithIdentity(Wt::Auth::Identity::LoginName, "pi");
 
     if (! user.isValid()) {
@@ -199,7 +201,6 @@ void HelloApplication::authEvent() {
         << " (" << u.identity(Wt::Auth::Identity::LoginName) << ")"
         << " logged in.";
 
-        authWidget->hide();
         takePicWidget->show();
 
     } else {
