@@ -43,6 +43,7 @@
 
 
 // Debian packages needed: libwt-dev libwt-doc libopencv-dev libwtdbo-dev libwtext-dev libwthttp-dev libwtdbosqlite-dev
+// cmake gcc make autoconf automake libtool, flex, bison, gdb
 // Run with: --http-port 8080 --http-address localhost --docroot 'docroot' --approot '.'
 // Stream video vlc v4l2:///dev/video0:size640x480
 // vlc -I dummy -v --noaudio --ttl 12 v4l2:///dev/video0:size=640x480  --sout '#std{access=mmsh,dst=:8081}' -V X11
