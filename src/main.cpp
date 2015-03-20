@@ -161,7 +161,12 @@ HelloApplication::HelloApplication(const Wt::WEnvironment& env)
     //setTheme(new Wt::WBootstrapTheme());
     useStyleSheet("css/style.css");
 
-    session.registerUser("pi", "123456");
+    Wt::Auth::User user =  session.getUsers().findWithIdentity(Wt::Auth::Identity::LoginName, "pi");
+
+    if (! user.isValid()) {
+       session.registerUser("pi", "123456");
+       }
+
 
     authWidget
             = new Wt::Auth::AuthWidget(Session::getBaseAuth(), session.getUsers(),
@@ -185,13 +190,16 @@ HelloApplication::HelloApplication(const Wt::WEnvironment& env)
 //===============================================================
 
 void HelloApplication::authEvent() {
-    if (session.getLogin().loggedIn()) {
+   Wt::log("info") << "Auth event";
+
+   if (session.getLogin().loggedIn()) {
         const Wt::Auth::User& u = session.getLogin().user();
         Wt::log("notice")
         << "User " << u.id()
         << " (" << u.identity(Wt::Auth::Identity::LoginName) << ")"
         << " logged in.";
 
+        authWidget->hide();
         takePicWidget->show();
 
     } else {
