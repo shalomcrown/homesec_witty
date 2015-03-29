@@ -22,6 +22,8 @@
 #include <Wt/Auth/AuthModel>
 #include <Wt/WAnchor>
 #include <Wt/WObject>
+#include <Wt/WMediaPlayer>
+#include <Wt/WEnvironment>
 #include <opencv2/objdetect/objdetect.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -46,7 +48,7 @@
 // cmake gcc make autoconf automake libtool, flex, bison, gdb
 // Run with: --http-port 8080 --http-address localhost --docroot 'docroot' --approot '.'
 // Stream video vlc v4l2:///dev/video0:size640x480
-// vlc -I dummy -v --noaudio --ttl 12 v4l2:///dev/video0:size=640x480  --sout '#std{access=mmsh,dst=:8081}' -V X11
+// cvlc --noaudio v4l2:///dev/video0:size=640x480:v4l2-fps=10 --sout '#transcode{vcodec=mpv4}:standard{access=http,dst=:8081/,mux=ts}'
 
 cv::VideoCapture *cap = nullptr;
 
@@ -147,6 +149,7 @@ public:
 private:
     TakePicWidget *takePicWidget;
     Session session;
+    Wt::WMediaPlayer *mediaPlayer;
 };
 
 
@@ -175,8 +178,18 @@ HelloApplication::HelloApplication(const Wt::WEnvironment& env)
             = new Wt::Auth::AuthWidget(Session::getBaseAuth(), session.getUsers(),
                                session.getLogin());
 
+
+    std::string hostName = env.hostName();
+    std::string videoUrl =  std::string("http://") + hostName.substr(0, hostName.find(':')) + ":8081/";
+
     takePicWidget = new TakePicWidget(root());
     takePicWidget->hide();
+
+    mediaPlayer = new Wt::WMediaPlayer(Wt::WMediaPlayer::Video, root());
+    mediaPlayer->addSource(Wt::WMediaPlayer::M4V, videoUrl);
+    mediaPlayer->addSource(Wt::WMediaPlayer::OGV, videoUrl);
+    mediaPlayer->hide();
+
 
     session.getLogin().changed().connect(this, &HelloApplication::authEvent);
 
@@ -186,6 +199,7 @@ HelloApplication::HelloApplication(const Wt::WEnvironment& env)
     authWidget->processEnvironment();
     root()->addWidget(authWidget);
     root()->addWidget(takePicWidget);
+    root()->addWidget(mediaPlayer);
 
 
 }
@@ -203,10 +217,12 @@ void HelloApplication::authEvent() {
         << " logged in.";
 
         takePicWidget->show();
+        mediaPlayer->show();
 
     } else {
         Wt::log("notice") << "User logged out.";
         takePicWidget->hide();
+        mediaPlayer->hide();
     }
 }
 
