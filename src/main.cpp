@@ -48,7 +48,9 @@
 // cmake gcc make autoconf automake libtool, flex, bison, gdb
 // Run with: --http-port 8080 --http-address localhost --docroot 'docroot' --approot '.'
 // Stream video vlc v4l2:///dev/video0:size640x480
-// cvlc --noaudio v4l2:///dev/video0:size=640x480:v4l2-fps=10 --sout '#transcode{vcodec=mpv4}:standard{access=http,dst=:8081/,mux=ts}'
+// cvlc --noaudio v4l2:///dev/video0:size=640x480:v4l2-fps=10 --sout '#transcode{vcodec=}:standard{access=http,dst=:8081/,mux=ogg}'
+// cvlc --noaudio v4l2:///dev/video0:width=640:height=480:fps=10 --sout '#transcode{vcodec=FLV1,f}:std{access=http{mime=video/x-flv},mux=ffmpeg{mux=flv},dst=0.0.0.0:8081/stream.flv}'
+// cvlc --noaudio v4l:// :v4l-vdev="/dev/video0" --sout '#transcode{vcodec=FLV1,fps=10}:std{access=http{mime=video/x-flv},mux=ffmpeg{mux=flv},dst=0.0.0.0:8081/stream.flv}'
 
 cv::VideoCapture *cap = nullptr;
 
@@ -180,14 +182,16 @@ HelloApplication::HelloApplication(const Wt::WEnvironment& env)
 
 
     std::string hostName = env.hostName();
-    std::string videoUrl =  std::string("http://") + hostName.substr(0, hostName.find(':')) + ":8081/";
+    std::string videoUrl =  std::string("http://") + hostName.substr(0, hostName.find(':')) + ":8081/stream.flv";
+
+    Wt::log("info") << "Video URL:" << videoUrl;
 
     takePicWidget = new TakePicWidget(root());
     takePicWidget->hide();
 
     mediaPlayer = new Wt::WMediaPlayer(Wt::WMediaPlayer::Video, root());
-    mediaPlayer->addSource(Wt::WMediaPlayer::M4V, videoUrl);
-    mediaPlayer->addSource(Wt::WMediaPlayer::OGV, videoUrl);
+    mediaPlayer->addSource(Wt::WMediaPlayer::FLV, videoUrl);
+//    mediaPlayer->addSource(Wt::WMediaPlayer::OGV, videoUrl);
     mediaPlayer->hide();
 
 
@@ -218,6 +222,7 @@ void HelloApplication::authEvent() {
 
         takePicWidget->show();
         mediaPlayer->show();
+        mediaPlayer->play();
 
     } else {
         Wt::log("notice") << "User logged out.";
